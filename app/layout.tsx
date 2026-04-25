@@ -15,10 +15,6 @@ export const metadata: Metadata = {
     "Personal trading journal and session checklist for the S.C.A.L.P. framework by WWA Trading. Track pre-session analysis, London & NY sessions, and performance stats.",
   keywords: ["trading journal", "SCALP framework", "forex", "GBPUSD", "EURUSD", "WWA Trading"],
   metadataBase: new URL('https://trading-dashboard-eta-ten.vercel.app'),
-  icons: {
-    icon: '/icon.png',
-    apple: '/apple-icon.png',
-  },
   openGraph: {
     title: "S.C.A.L.P. Journal",
     description: "Personal trading journal and session checklist for the S.C.A.L.P. framework.",

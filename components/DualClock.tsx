@@ -9,20 +9,20 @@ export default function DualClock() {
     const update = () => {
       const now = new Date()
 
-      const londonTime = now.toLocaleTimeString('en-GB', {
+      const londonTime = now.toLocaleTimeString('en-US', {
         timeZone: 'Europe/London',
-        hour: '2-digit',
+        hour: 'numeric',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false,
+        hour12: true,
       })
 
-      const kolkataTime = now.toLocaleTimeString('en-GB', {
+      const kolkataTime = now.toLocaleTimeString('en-US', {
         timeZone: 'Asia/Kolkata',
-        hour: '2-digit',
+        hour: 'numeric',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false,
+        hour12: true,
       })
 
       const londonDate = now.toLocaleDateString('en-GB', {
