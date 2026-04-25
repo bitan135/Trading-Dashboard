@@ -1,7 +1,7 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { User } from 'firebase/auth'
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
+import type { User } from 'firebase/auth'
 
 interface AuthContextType {
   user: User | null
@@ -30,8 +30,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const init = async () => {
       try {
         const { getAuthInstance } = await import('@/lib/firebase')
-        const { onAuthStateChanged } = await import('firebase/auth')
+        const { onAuthStateChanged, getRedirectResult } = await import('firebase/auth')
         const auth = getAuthInstance()
+
+        // Check for redirect result (from signInWithRedirect)
+        try {
+          await getRedirectResult(auth)
+        } catch (e) {
+          // Redirect result errors are non-fatal
+          console.warn('Redirect result check:', e)
+        }
+
         unsub = onAuthStateChanged(auth, (firebaseUser) => {
           setUser(firebaseUser)
           setLoading(false)
@@ -47,17 +56,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { if (unsub) unsub() }
   }, [])
 
-  const signIn = async () => {
+  const signIn = useCallback(async () => {
     try {
       const { getAuthInstance, getGoogleProvider } = await import('@/lib/firebase')
-      const { signInWithPopup } = await import('firebase/auth')
-      await signInWithPopup(getAuthInstance(), getGoogleProvider())
+      const { signInWithPopup, signInWithRedirect, browserPopupRedirectResolver } = await import('firebase/auth')
+      const auth = getAuthInstance()
+      const provider = getGoogleProvider()
+
+      try {
+        // Try popup first
+        await signInWithPopup(auth, provider, browserPopupRedirectResolver)
+      } catch (popupError: unknown) {
+        const errorCode = (popupError as { code?: string })?.code
+        console.warn('Popup sign-in failed, trying redirect:', errorCode)
+
+        // If popup blocked or failed, fall back to redirect
+        if (
+          errorCode === 'auth/popup-blocked' ||
+          errorCode === 'auth/popup-closed-by-user' ||
+          errorCode === 'auth/cancelled-popup-request' ||
+          errorCode === 'auth/internal-error'
+        ) {
+          await signInWithRedirect(auth, provider)
+        } else {
+          throw popupError
+        }
+      }
     } catch (error) {
       console.error('Sign in error:', error)
     }
-  }
+  }, [])
 
-  const signOut = async () => {
+  const signOutFn = useCallback(async () => {
     try {
       const { getAuthInstance } = await import('@/lib/firebase')
       const { signOut: firebaseSignOut } = await import('firebase/auth')
@@ -65,9 +95,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Sign out error:', error)
     }
-  }
+  }, [])
 
-  // During SSR or before mount, show nothing (let the body bg show)
+  // During SSR or before mount, show loading spinner
   if (!mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -77,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signOut: signOutFn }}>
       {children}
     </AuthContext.Provider>
   )
