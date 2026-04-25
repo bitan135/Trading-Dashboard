@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore'
-import { getDb } from '@/lib/firebase'
 import { useAuthContext } from '@/components/AuthProvider'
 import { TradeDay, DEFAULT_TRADE_DAY } from '@/types'
 import { getTodayUTC, getWeekNumber } from '@/lib/utils'
@@ -19,10 +18,13 @@ export function useTradeDay(dateString?: string) {
       return
     }
 
-    const docRef = doc(getDb(), 'users', user.uid, 'trade_days', date)
+    let unsub: (() => void) | undefined
 
-    // Auto-create today's doc if it doesn't exist
-    const initDoc = async () => {
+    const init = async () => {
+      const { getDb } = await import('@/lib/firebase')
+      const docRef = doc(getDb(), 'users', user.uid, 'trade_days', date)
+
+      // Auto-create today's doc if it doesn't exist
       try {
         await setDoc(docRef, {
           ...DEFAULT_TRADE_DAY,
@@ -34,25 +36,26 @@ export function useTradeDay(dateString?: string) {
       } catch (error) {
         console.error('Error initializing trade day:', error)
       }
+
+      unsub = onSnapshot(docRef, (snap) => {
+        if (snap.exists()) {
+          setTradeDay({ ...DEFAULT_TRADE_DAY, ...snap.data() } as TradeDay)
+        }
+        setLoading(false)
+      }, (error) => {
+        console.error('TradeDay snapshot error:', error)
+        setLoading(false)
+      })
     }
 
-    initDoc()
+    init()
 
-    const unsub = onSnapshot(docRef, (snap) => {
-      if (snap.exists()) {
-        setTradeDay({ ...DEFAULT_TRADE_DAY, ...snap.data() } as TradeDay)
-      }
-      setLoading(false)
-    }, (error) => {
-      console.error('TradeDay snapshot error:', error)
-      setLoading(false)
-    })
-
-    return () => unsub()
+    return () => { if (unsub) unsub() }
   }, [user, date])
 
   const updateTradeDay = useCallback(async (fields: Partial<TradeDay>) => {
     if (!user) return
+    const { getDb } = await import('@/lib/firebase')
     const docRef = doc(getDb(), 'users', user.uid, 'trade_days', date)
     try {
       await setDoc(docRef, {

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { collection, doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore'
-import { getDb } from '@/lib/firebase'
 import { useAuthContext } from '@/components/AuthProvider'
 import { ChecklistSection } from '@/types'
 
@@ -18,23 +17,29 @@ export function useChecklistItems(dateString: string) {
       return
     }
 
-    const colRef = collection(getDb(), 'users', user.uid, 'trade_days', dateString, 'checklist_items')
-    const unsub = onSnapshot(colRef, (snap) => {
-      const data: Record<string, boolean> = {}
-      snap.forEach((doc) => {
-        const docData = doc.data()
-        data[doc.id] = docData.checked ?? false
+    let unsub: (() => void) | undefined
+
+    const init = async () => {
+      const { getDb } = await import('@/lib/firebase')
+      const colRef = collection(getDb(), 'users', user.uid, 'trade_days', dateString, 'checklist_items')
+      unsub = onSnapshot(colRef, (snap) => {
+        const data: Record<string, boolean> = {}
+        snap.forEach((doc) => {
+          const docData = doc.data()
+          data[doc.id] = docData.checked ?? false
+        })
+        setItems(data)
+        setLoading(false)
+      }, (error) => {
+        console.error('Checklist snapshot error:', error)
+        setLoading(false)
       })
-      setItems(data)
-      setLoading(false)
-    }, (error) => {
-      console.error('Checklist snapshot error:', error)
-      setLoading(false)
-    })
+    }
+
+    init()
 
     return () => {
-      unsub()
-      // Clear all pending debounce timers
+      if (unsub) unsub()
       Object.values(debounceTimers.current).forEach(clearTimeout)
     }
   }, [user, dateString])
@@ -55,6 +60,7 @@ export function useChecklistItems(dateString: string) {
     // Debounced Firestore write
     debounceTimers.current[itemKey] = setTimeout(async () => {
       try {
+        const { getDb } = await import('@/lib/firebase')
         const docRef = doc(getDb(), 'users', user.uid, 'trade_days', dateString, 'checklist_items', itemKey)
         await setDoc(docRef, {
           section,
@@ -63,7 +69,6 @@ export function useChecklistItems(dateString: string) {
         }, { merge: true })
       } catch (error) {
         console.error('Error toggling checklist item:', error)
-        // Revert optimistic update on error
         setItems(prev => ({ ...prev, [itemKey]: !newValue }))
       }
     }, 200)
