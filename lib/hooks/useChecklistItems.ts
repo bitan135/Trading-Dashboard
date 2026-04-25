@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { collection, doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { getDb } from '@/lib/firebase'
 import { useAuthContext } from '@/components/AuthProvider'
 import { ChecklistSection } from '@/types'
 
@@ -18,7 +18,7 @@ export function useChecklistItems(dateString: string) {
       return
     }
 
-    const colRef = collection(db, 'users', user.uid, 'trade_days', dateString, 'checklist_items')
+    const colRef = collection(getDb(), 'users', user.uid, 'trade_days', dateString, 'checklist_items')
     const unsub = onSnapshot(colRef, (snap) => {
       const data: Record<string, boolean> = {}
       snap.forEach((doc) => {
@@ -55,7 +55,7 @@ export function useChecklistItems(dateString: string) {
     // Debounced Firestore write
     debounceTimers.current[itemKey] = setTimeout(async () => {
       try {
-        const docRef = doc(db, 'users', user.uid, 'trade_days', dateString, 'checklist_items', itemKey)
+        const docRef = doc(getDb(), 'users', user.uid, 'trade_days', dateString, 'checklist_items', itemKey)
         await setDoc(docRef, {
           section,
           checked: newValue,

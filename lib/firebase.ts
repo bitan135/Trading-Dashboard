@@ -1,6 +1,6 @@
-import { initializeApp, getApps } from 'firebase/app'
-import { getFirestore } from 'firebase/firestore'
-import { getAuth, GoogleAuthProvider } from 'firebase/auth'
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app'
+import { getFirestore, Firestore } from 'firebase/firestore'
+import { getAuth, GoogleAuthProvider, Auth } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,7 +11,29 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-export const db = getFirestore(app)
-export const auth = getAuth(app)
-export const googleProvider = new GoogleAuthProvider()
+// Lazy singletons — prevents Firebase from initializing during SSR prerendering
+let _app: FirebaseApp | null = null
+let _db: Firestore | null = null
+let _auth: Auth | null = null
+let _googleProvider: GoogleAuthProvider | null = null
+
+function getApp(): FirebaseApp {
+  if (_app) return _app
+  _app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+  return _app
+}
+
+export function getDb(): Firestore {
+  if (!_db) _db = getFirestore(getApp())
+  return _db
+}
+
+export function getAuthInstance(): Auth {
+  if (!_auth) _auth = getAuth(getApp())
+  return _auth
+}
+
+export function getGoogleProvider(): GoogleAuthProvider {
+  if (!_googleProvider) _googleProvider = new GoogleAuthProvider()
+  return _googleProvider
+}

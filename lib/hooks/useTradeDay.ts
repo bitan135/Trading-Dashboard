@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { getDb } from '@/lib/firebase'
 import { useAuthContext } from '@/components/AuthProvider'
 import { TradeDay, DEFAULT_TRADE_DAY } from '@/types'
 import { getTodayUTC, getWeekNumber } from '@/lib/utils'
@@ -19,7 +19,7 @@ export function useTradeDay(dateString?: string) {
       return
     }
 
-    const docRef = doc(db, 'users', user.uid, 'trade_days', date)
+    const docRef = doc(getDb(), 'users', user.uid, 'trade_days', date)
 
     // Auto-create today's doc if it doesn't exist
     const initDoc = async () => {
@@ -53,7 +53,7 @@ export function useTradeDay(dateString?: string) {
 
   const updateTradeDay = useCallback(async (fields: Partial<TradeDay>) => {
     if (!user) return
-    const docRef = doc(db, 'users', user.uid, 'trade_days', date)
+    const docRef = doc(getDb(), 'users', user.uid, 'trade_days', date)
     try {
       await setDoc(docRef, {
         ...fields,

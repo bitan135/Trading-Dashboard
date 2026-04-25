@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { getDb } from '@/lib/firebase'
 import { useAuthContext } from '@/components/AuthProvider'
 import { TradeDay, DEFAULT_TRADE_DAY } from '@/types'
 
@@ -17,7 +17,7 @@ export function useJournal(maxDays: number = 60) {
       return
     }
 
-    const colRef = collection(db, 'users', user.uid, 'trade_days')
+    const colRef = collection(getDb(), 'users', user.uid, 'trade_days')
     const q = query(colRef, orderBy('date', 'desc'), limit(maxDays))
 
     const unsub = onSnapshot(q, (snap) => {
