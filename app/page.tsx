@@ -1,65 +1,174 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { useAuthContext } from '@/components/AuthProvider'
+import { useJournal } from '@/lib/hooks/useJournal'
+import { useStats, useWeekStats } from '@/lib/hooks/useStats'
+import { useTradeDay } from '@/lib/hooks/useTradeDay'
+import { useChecklistItems } from '@/lib/hooks/useChecklistItems'
+import { getActiveSessionLabel } from '@/lib/session-timing'
+import { getTodayUTC, getWeekNumber } from '@/lib/utils'
+import Navbar from '@/components/Navbar'
+import UtcClock from '@/components/UtcClock'
+import ProgressBar from '@/components/ProgressBar'
+import StatCard from '@/components/StatCard'
+import DayCard from '@/components/DayCard'
+import { PRE_SESSION_ITEMS, LONDON_LIQ_ITEMS, LONDON_ENTRY_ITEMS, NY_LIQ_ITEMS, NY_ENTRY_ITEMS } from '@/lib/checklist-config'
+import { ChevronRight } from 'lucide-react'
+
+export default function DashboardPage() {
+  const { user, loading: authLoading } = useAuthContext()
+  const router = useRouter()
+  const today = getTodayUTC()
+  const currentWeek = getWeekNumber(today)
+  const { tradeDay } = useTradeDay(today)
+  const { items: checklistItems } = useChecklistItems(today)
+  const { days, loading: journalLoading } = useJournal(60)
+  const weekStats = useWeekStats(days, currentWeek)
+  const [sessionLabel, setSessionLabel] = useState('')
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login')
+    }
+  }, [user, authLoading, router])
+
+  useEffect(() => {
+    const update = () => setSessionLabel(getActiveSessionLabel(new Date()))
+    update()
+    const interval = setInterval(update, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="loading-spinner" />
+      </div>
+    )
+  }
+
+  // Calculate checklist progress for today
+  const preChecked = PRE_SESSION_ITEMS.filter(i => checklistItems[i.key]).length
+  const londonChecked = [...LONDON_LIQ_ITEMS, ...LONDON_ENTRY_ITEMS].filter(i => checklistItems[i.key]).length
+  const nyChecked = [...NY_LIQ_ITEMS, ...NY_ENTRY_ITEMS].filter(i => checklistItems[i.key]).length
+
+  const last5 = days.slice(0, 5)
+
+  const isLive = sessionLabel.includes('LIVE')
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <Navbar />
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col gap-8">
+        {/* Header Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col gap-2">
+            <UtcClock />
+            <div className="flex items-center gap-2 mt-1">
+              {isLive && (
+                <span className="w-2 h-2 rounded-full bg-[#00ff88] animate-pulse-green" />
+              )}
+              <span className={`text-xs uppercase tracking-widest ${isLive ? 'text-[#00ff88]' : 'text-[#888]'}`}>
+                {sessionLabel}
+              </span>
+            </div>
+          </div>
+
+          <Link href="/session" className="btn-primary flex items-center gap-2 self-start sm:self-auto">
+            &gt; START_SESSION
+            <ChevronRight size={14} />
+          </Link>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* Today's Progress */}
+        <section className="panel p-6 flex flex-col gap-5">
+          <div className="terminal-header">
+            <span className="prefix">&gt;</span>
+            <span>TODAY_PROGRESS</span>
+            <span className="subtitle">// {today}</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <ProgressBar label="Pre-Session" current={preChecked} total={PRE_SESSION_ITEMS.length} />
+            <ProgressBar
+              label="London Session"
+              current={londonChecked}
+              total={LONDON_LIQ_ITEMS.length + LONDON_ENTRY_ITEMS.length}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+            <ProgressBar
+              label="NY Session"
+              current={nyChecked}
+              total={NY_LIQ_ITEMS.length + NY_ENTRY_ITEMS.length}
+            />
+          </div>
+
+          {tradeDay && (
+            <div className="flex flex-wrap gap-3 text-xs">
+              {tradeDay.pair && (
+                <span className="badge bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/20">
+                  {tradeDay.pair}
+                </span>
+              )}
+              {tradeDay.bias && (
+                <span className={`badge border ${tradeDay.bias === 'Bullish' ? 'bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/20' : 'bg-[#ff4444]/10 text-[#ff4444] border-[#ff4444]/20'}`}>
+                  {tradeDay.bias}
+                </span>
+              )}
+              {tradeDay.zone && (
+                <span className={`badge border ${tradeDay.zone === 'Premium' ? 'bg-[#ffaa00]/10 text-[#ffaa00] border-[#ffaa00]/20' : 'bg-[#00d4ff]/10 text-[#00d4ff] border-[#00d4ff]/20'}`}>
+                  {tradeDay.zone}
+                </span>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Week Stats */}
+        <section className="flex flex-col gap-4">
+          <div className="terminal-header">
+            <span className="prefix">&gt;</span>
+            <span>WEEK_{currentWeek}_STATS</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <StatCard label="Trades" value={weekStats.trades} color="cyan" />
+            <StatCard label="Wins" value={weekStats.wins} color="green" />
+            <StatCard label="Losses" value={weekStats.losses} color="red" />
+            <StatCard label="Breakeven" value={weekStats.breakeven} color="amber" />
+          </div>
+        </section>
+
+        {/* Last 5 Days */}
+        <section className="flex flex-col gap-4">
+          <div className="terminal-header">
+            <span className="prefix">&gt;</span>
+            <span>RECENT_SESSIONS</span>
+            <span className="subtitle">// last 5 days</span>
+          </div>
+
+          {journalLoading ? (
+            <div className="flex items-center gap-3 text-[#555] text-sm">
+              <div className="loading-spinner" />
+              Loading journal data...
+            </div>
+          ) : last5.length === 0 ? (
+            <div className="panel p-8 text-center text-[#555] text-sm">
+              No trading sessions recorded yet. Start your first session above.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {last5.map((day) => (
+                <Link key={day.date} href={`/journal/${day.date}`}>
+                  <DayCard day={day} />
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
       </main>
-    </div>
-  );
+    </>
+  )
 }

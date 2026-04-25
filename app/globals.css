@@ -1,26 +1,357 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: #0a0a0a;
+  --color-bg-panel: #0f0f0f;
+  --color-bg-elevated: #141414;
+  --color-green: #00ff88;
+  --color-cyan: #00d4ff;
+  --color-amber: #ffaa00;
+  --color-red: #ff4444;
+  --color-text: #e0e0e0;
+  --color-muted: #555555;
+  --color-border: rgba(0, 255, 136, 0.1);
+  --font-mono: var(--font-jetbrains);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ========== BASE RESET ========== */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: #0a0a0a;
+  color: #e0e0e0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #0a0a0a;
+  color: #e0e0e0;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ========== SCANLINE EFFECT ========== */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 136, 0.03) 2px,
+    rgba(0, 255, 136, 0.03) 4px
+  );
+}
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 136, 0.2);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 136, 0.4);
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(0, 255, 136, 0.1); }
+  50% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.15); }
+}
+
+@keyframes flash-green {
+  0% { background-color: rgba(0, 255, 136, 0.3); }
+  100% { background-color: transparent; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-pulse-green {
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+.animate-flash-green {
+  animation: flash-green 0.4s ease-out;
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* ========== TERMINAL PANEL ========== */
+.panel {
+  background: #0f0f0f;
+  border: 1px solid rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.06);
+  border-radius: 4px;
+}
+
+.panel-elevated {
+  background: #141414;
+  border: 1px solid rgba(0, 255, 136, 0.15);
+  box-shadow: 0 0 30px rgba(0, 255, 136, 0.08);
+  border-radius: 4px;
+}
+
+/* ========== LOCKED STATE ========== */
+.locked {
+  opacity: 0.4;
+  filter: grayscale(1);
+  pointer-events: none;
+  position: relative;
+}
+
+/* ========== TERMINAL CHECKBOX ========== */
+.terminal-checkbox {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 2px;
+}
+
+.terminal-checkbox:hover {
+  background: rgba(0, 255, 136, 0.04);
+}
+
+.terminal-checkbox .check-box {
+  font-size: 14px;
+  font-weight: 700;
+  min-width: 28px;
+  text-align: center;
+  color: #555;
+  transition: color 0.15s ease;
+}
+
+.terminal-checkbox.checked .check-box {
+  color: #00ff88;
+}
+
+.terminal-checkbox .check-label {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e0e0e0;
+}
+
+.terminal-checkbox.checked .check-label {
+  color: #00ff88;
+  opacity: 0.8;
+}
+
+/* ========== PROGRESS BAR ========== */
+.progress-track {
+  background: #1a1a1a;
+  border: 1px solid rgba(0, 255, 136, 0.1);
+  border-radius: 2px;
+  height: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #00ff88, #00d4ff);
+  height: 100%;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  background: #fff;
+  opacity: 0.6;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* ========== FORM INPUTS ========== */
+input[type="number"],
+textarea,
+select {
+  background: #0a0a0a;
+  border: 1px solid rgba(0, 255, 136, 0.15);
+  color: #e0e0e0;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 2px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  border-color: #00ff88;
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.1);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+select {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3e%3cpath fill='%2300ff88' d='M6 8L1 3h10z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+/* ========== BUTTON ========== */
+.btn-primary {
+  background: transparent;
+  border: 1px solid #00ff88;
+  color: #00ff88;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 24px;
+  cursor: pointer;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-danger {
+  border-color: #ff4444;
+  color: #ff4444;
+}
+
+.btn-danger:hover {
+  background: rgba(255, 68, 68, 0.1);
+  box-shadow: 0 0 20px rgba(255, 68, 68, 0.15);
+}
+
+/* ========== TERMINAL HEADER ========== */
+.terminal-header {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #00ff88;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.terminal-header .prefix {
+  color: #00ff88;
+  opacity: 0.6;
+}
+
+.terminal-header .subtitle {
+  color: #555;
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+/* ========== RADIO GROUP ========== */
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid rgba(0, 255, 136, 0.1);
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s ease;
+  color: #888;
+}
+
+.radio-option:hover {
+  border-color: rgba(0, 255, 136, 0.3);
+  color: #e0e0e0;
+}
+
+.radio-option.selected {
+  border-color: #00ff88;
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.06);
+}
+
+/* ========== MISC ========== */
+.section-divider {
+  border: none;
+  border-top: 1px solid rgba(0, 255, 136, 0.08);
+  margin: 24px 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 255, 136, 0.2);
+  border-top-color: #00ff88;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
