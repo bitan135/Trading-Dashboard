@@ -21,6 +21,8 @@ export interface TradeDay {
   ny_result: SessionResult | null
   ny_pips: number | null
   ny_notes: string
+  screenshot_url_before?: string
+  screenshot_url_after?: string
   day_summary_notes: string
   created_at: Timestamp | null
   updated_at: Timestamp | null
@@ -87,5 +89,7 @@ export const DEFAULT_TRADE_DAY: Omit<TradeDay, 'created_at' | 'updated_at'> = {
   ny_result: null,
   ny_pips: null,
   ny_notes: '',
+  screenshot_url_before: '',
+  screenshot_url_after: '',
   day_summary_notes: '',
 }

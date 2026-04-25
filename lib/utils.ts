@@ -1,13 +1,24 @@
-export function getTodayUTC(): string {
-  const now = new Date()
-  return now.toISOString().split('T')[0]
+export function getTodayDate(): string {
+  // Returns 'YYYY-MM-DD' exactly for London time
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/London',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date()) // 'en-CA' inherently formats as YYYY-MM-DD
 }
 
 export function getWeekNumber(dateString: string): number {
-  const date = new Date(dateString + 'T00:00:00Z')
-  const jan1 = new Date(Date.UTC(date.getUTCFullYear(), 0, 1))
-  const dayOfYear = Math.floor((date.getTime() - jan1.getTime()) / 86400000) + 1
-  return Math.ceil((dayOfYear + jan1.getUTCDay()) / 7)
+  const date = new Date(dateString + 'T12:00:00Z') // Use midday UTC to prevent timezone jump
+  const target = new Date(date.valueOf())
+  const dayNr = (date.getUTCDay() + 6) % 7
+  target.setUTCDate(target.getUTCDate() - dayNr + 3)
+  const firstThursday = target.valueOf()
+  target.setUTCMonth(0, 1)
+  if (target.getUTCDay() !== 4) {
+    target.setUTCMonth(0, 1 + ((4 - target.getUTCDay()) + 7) % 7)
+  }
+  return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000)
 }
 
 export function formatPips(pips: number | null): string {
@@ -48,17 +59,17 @@ export function getRowBgClass(londonResult: string | null, nyResult: string | nu
 }
 
 export function formatDate(dateString: string): string {
-  const date = new Date(dateString + 'T00:00:00Z')
+  const date = new Date(dateString + 'T12:00:00Z')
   return date.toLocaleDateString('en-GB', {
     weekday: 'short',
     day: '2-digit',
     month: 'short',
     year: 'numeric',
-    timeZone: 'UTC',
+    timeZone: 'UTC', // the date string is artificially set, so use UTC to display it literally
   })
 }
 
 export function getMonthLabel(dateString: string): string {
-  const date = new Date(dateString + 'T00:00:00Z')
+  const date = new Date(dateString + 'T12:00:00Z')
   return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 }

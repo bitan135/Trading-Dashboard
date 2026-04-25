@@ -9,9 +9,9 @@ import { useStats, useWeekStats } from '@/lib/hooks/useStats'
 import { useTradeDay } from '@/lib/hooks/useTradeDay'
 import { useChecklistItems } from '@/lib/hooks/useChecklistItems'
 import { getActiveSessionLabel } from '@/lib/session-timing'
-import { getTodayUTC, getWeekNumber } from '@/lib/utils'
+import { getTodayDate, getWeekNumber } from '@/lib/utils'
 import Navbar from '@/components/Navbar'
-import UtcClock from '@/components/UtcClock'
+import DualClock from '@/components/DualClock'
 import ProgressBar from '@/components/ProgressBar'
 import StatCard from '@/components/StatCard'
 import DayCard from '@/components/DayCard'
@@ -21,7 +21,7 @@ import { ChevronRight } from 'lucide-react'
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuthContext()
   const router = useRouter()
-  const today = getTodayUTC()
+  const today = getTodayDate()
   const currentWeek = getWeekNumber(today)
   const { tradeDay } = useTradeDay(today)
   const { items: checklistItems } = useChecklistItems(today)
@@ -66,7 +66,7 @@ export default function DashboardPage() {
         {/* Header Row */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-col gap-2">
-            <UtcClock />
+            <DualClock />
             <div className="flex items-center gap-2 mt-1">
               {isLive && (
                 <span className="w-2 h-2 rounded-full bg-[#00ff88] animate-pulse-green" />

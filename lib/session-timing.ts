@@ -23,8 +23,16 @@ export const NY_WINDOW: SessionWindow = {
 
 export const SUMMARY_UNLOCK_HOUR = 15
 
-function getUtcMinutes(now: Date): number {
-  return now.getUTCHours() * 60 + now.getUTCMinutes()
+function getLondonMinutes(now: Date): number {
+  const formatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+  
+  const [hour, minute] = formatter.format(now).split(':').map(Number)
+  return hour * 60 + minute
 }
 
 function windowToMinutes(window: SessionWindow): { start: number; end: number } {
@@ -41,7 +49,7 @@ export function getSessionStatus(
 ): SessionStatus {
   if (!prerequisiteMet) return 'locked'
 
-  const currentMinutes = getUtcMinutes(now)
+  const currentMinutes = getLondonMinutes(now)
   const { start, end } = windowToMinutes(window)
 
   if (currentMinutes < start) return 'countdown'
@@ -50,46 +58,57 @@ export function getSessionStatus(
 }
 
 export function getCountdown(window: SessionWindow, now: Date): CountdownTime {
-  const targetMs = Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate(),
-    window.startHour,
-    window.startMinute,
-    0
-  )
-  const nowMs = now.getTime()
-  const diffMs = Math.max(0, targetMs - nowMs)
-
-  const totalSeconds = Math.floor(diffMs / 1000)
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Europe/London',
+    year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: 'numeric', minute: 'numeric', second: 'numeric',
+    hour12: false
+  })
+  
+  // The 'now' value in London string format
+  // Instead of complex date math, we'll just use minutes remaining locally to keep it perfectly accurate to DST
+  const currentTotalMins = getLondonMinutes(now)
+  const targetTotalMins = window.startHour * 60 + window.startMinute
+  
+  if (currentTotalMins >= targetTotalMins) return { hours: 0, minutes: 0, seconds: 0 }
+  
+  // Diff in pure seconds
+  const currentSecs = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' })).getSeconds()
+  const currentTotalSeconds = currentTotalMins * 60 + currentSecs
+  const targetTotalSeconds = targetTotalMins * 60
+  
+  const diffSecs = targetTotalSeconds - currentTotalSeconds
+  
+  const hours = Math.floor(diffSecs / 3600)
+  const minutes = Math.floor((diffSecs % 3600) / 60)
+  const seconds = diffSecs % 60
 
   return { hours, minutes, seconds }
 }
 
 export function getElapsed(window: SessionWindow, now: Date): string {
-  const startMs = Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate(),
-    window.startHour,
-    window.startMinute,
-    0
-  )
-  const nowMs = now.getTime()
-  const diffMs = Math.max(0, nowMs - startMs)
-
-  const totalSeconds = Math.floor(diffMs / 1000)
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
+  const currentTotalMins = getLondonMinutes(now)
+  const startTotalMins = window.startHour * 60 + window.startMinute
+  
+  if (currentTotalMins < startTotalMins) return "00:00"
+  
+  const currentSecs = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' })).getSeconds()
+  const currentTotalSeconds = currentTotalMins * 60 + currentSecs
+  const startTotalSeconds = startTotalMins * 60
+  
+  const diffSecs = currentTotalSeconds - startTotalSeconds
+  
+  const minutes = Math.floor(diffSecs / 60)
+  const seconds = diffSecs % 60
 
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }
 
 export function isSummaryUnlocked(now: Date, londonResolved: boolean, nyResolved: boolean): boolean {
-  const currentHour = now.getUTCHours()
+  const currentHour = parseInt(
+    new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: '2-digit', hour12: false }).format(now),
+    10
+  )
   if (londonResolved && nyResolved) return true
   if (currentHour >= SUMMARY_UNLOCK_HOUR) return true
   return false
@@ -100,7 +119,7 @@ export function formatCountdown(cd: CountdownTime): string {
 }
 
 export function getActiveSessionLabel(now: Date): string {
-  const minutes = getUtcMinutes(now)
+  const minutes = getLondonMinutes(now)
   const london = windowToMinutes(LONDON_WINDOW)
   const ny = windowToMinutes(NY_WINDOW)
 

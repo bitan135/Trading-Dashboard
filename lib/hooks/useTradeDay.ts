@@ -4,11 +4,11 @@ import { useState, useEffect, useCallback } from 'react'
 import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore'
 import { useAuthContext } from '@/components/AuthProvider'
 import { TradeDay, DEFAULT_TRADE_DAY } from '@/types'
-import { getTodayUTC, getWeekNumber } from '@/lib/utils'
+import { getTodayDate, getWeekNumber } from '@/lib/utils'
 
 export function useTradeDay(dateString?: string) {
   const { user } = useAuthContext()
-  const date = dateString || getTodayUTC()
+  const date = dateString || getTodayDate()
   const [tradeDay, setTradeDay] = useState<TradeDay | null>(null)
   const [loading, setLoading] = useState(true)
 

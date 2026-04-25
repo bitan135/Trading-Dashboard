@@ -11,7 +11,7 @@ import {
   LONDON_WINDOW,
   NY_WINDOW,
 } from '@/lib/session-timing'
-import { getTodayUTC } from '@/lib/utils'
+import { getTodayDate } from '@/lib/utils'
 import {
   PRE_SESSION_ITEMS,
   LONDON_LIQ_ITEMS,
@@ -28,12 +28,13 @@ import ChecklistGroup from '@/components/ChecklistGroup'
 import ProgressBar from '@/components/ProgressBar'
 import SessionStatus from '@/components/SessionStatus'
 import OutcomeForm from '@/components/OutcomeForm'
+import ImageUploader from '@/components/ImageUploader'
 import { AlertTriangle } from 'lucide-react'
 
 export default function SessionPage() {
   const { user, loading: authLoading } = useAuthContext()
   const router = useRouter()
-  const today = getTodayUTC()
+  const today = getTodayDate()
   const { tradeDay, loading: dayLoading, updateTradeDay } = useTradeDay(today)
   const { items, toggleItem, loading: checklistLoading } = useChecklistItems(today)
   const [now, setNow] = useState(new Date())
@@ -372,6 +373,28 @@ export default function SessionPage() {
               placeholder="What did you learn today? What will you do differently tomorrow?"
               rows={4}
               disabled={!summaryUnlocked}
+            />
+          </div>
+
+          <hr className="section-divider" />
+
+          {/* Core Screenshots */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <ImageUploader 
+              label="Before Trade (HTF / Setup)" 
+              value={tradeDay?.screenshot_url_before} 
+              onChange={(url) => updateTradeDay({ screenshot_url_before: url })}
+              disabled={!summaryUnlocked}
+              dateString={today}
+              uid={user.uid}
+            />
+            <ImageUploader 
+              label="After Trade (Execution / Result)" 
+              value={tradeDay?.screenshot_url_after} 
+              onChange={(url) => updateTradeDay({ screenshot_url_after: url })}
+              disabled={!summaryUnlocked}
+              dateString={today}
+              uid={user.uid}
             />
           </div>
         </ChecklistSection>

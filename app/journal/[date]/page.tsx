@@ -227,6 +227,30 @@ export default function JournalDayPage() {
               <p className="text-xs text-[#888] whitespace-pre-wrap">{tradeDay.day_summary_notes || 'No reflection recorded.'}</p>
             )}
           </div>
+
+          {(tradeDay.screenshot_url_before || tradeDay.screenshot_url_after) && (
+            <div className="mt-4 pt-4 border-t border-[rgba(0,255,136,0.08)]">
+              <span className="text-[10px] text-[#555] uppercase tracking-widest block mb-3">Screenshots</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {tradeDay.screenshot_url_before && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] text-[#888] uppercase tracking-wider">Before</span>
+                    <a href={tradeDay.screenshot_url_before} target="_blank" rel="noopener noreferrer">
+                      <img src={tradeDay.screenshot_url_before} alt="Before Trade" className="rounded border border-[#333] hover:border-[#00ff88] transition-colors" />
+                    </a>
+                  </div>
+                )}
+                {tradeDay.screenshot_url_after && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] text-[#888] uppercase tracking-wider">After</span>
+                    <a href={tradeDay.screenshot_url_after} target="_blank" rel="noopener noreferrer">
+                      <img src={tradeDay.screenshot_url_after} alt="After Trade" className="rounded border border-[#333] hover:border-[#00ff88] transition-colors" />
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </>
