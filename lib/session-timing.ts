@@ -132,6 +132,8 @@ export function isMarketOpen(now: Date): boolean {
 }
 
 export function getActiveSessionLabel(now: Date): string {
+  if (!isMarketOpen(now)) return 'Market Closed'
+  
   const minutes = getLondonMinutes(now)
   const london = windowToMinutes(LONDON_WINDOW)
   const ny = windowToMinutes(NY_WINDOW)

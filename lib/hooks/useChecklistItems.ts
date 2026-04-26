@@ -48,32 +48,35 @@ export function useChecklistItems(dateString: string) {
   const toggleItem = useCallback((itemKey: string, section: ChecklistSection) => {
     if (!user) return
 
-    const newValue = !items[itemKey]
+    setItems(prev => {
+      const currentValue = prev[itemKey] ?? false
+      const newValue = !currentValue
 
-    // Optimistic update
-    setItems(prev => ({ ...prev, [itemKey]: newValue }))
-
-    // Clear existing debounce for this key
-    if (debounceTimers.current[itemKey]) {
-      clearTimeout(debounceTimers.current[itemKey])
-    }
-
-    // Debounced Firestore write
-    debounceTimers.current[itemKey] = setTimeout(async () => {
-      try {
-        const { getDb } = await import('@/lib/firebase')
-        const docRef = doc(getDb(), 'users', user.uid, 'trade_days', dateString, 'checklist_items', itemKey)
-        await setDoc(docRef, {
-          section,
-          checked: newValue,
-          updated_at: serverTimestamp(),
-        }, { merge: true })
-      } catch (error) {
-        console.error('Error toggling checklist item:', error)
-        setItems(prev => ({ ...prev, [itemKey]: !newValue }))
+      // Clear existing debounce for this key
+      if (debounceTimers.current[itemKey]) {
+        clearTimeout(debounceTimers.current[itemKey])
       }
-    }, 200)
-  }, [user, dateString, items])
+
+      // Debounced Firestore write
+      debounceTimers.current[itemKey] = setTimeout(async () => {
+        try {
+          const { getDb } = await import('@/lib/firebase')
+          const docRef = doc(getDb(), 'users', user.uid, 'trade_days', dateString, 'checklist_items', itemKey)
+          await setDoc(docRef, {
+            section,
+            checked: newValue,
+            updated_at: serverTimestamp(),
+          }, { merge: true })
+        } catch (error) {
+          console.error('Error toggling checklist item:', error)
+          // Revert on error
+          setItems(p => ({ ...p, [itemKey]: currentValue }))
+        }
+      }, 300)
+
+      return { ...prev, [itemKey]: newValue }
+    })
+  }, [user, dateString])
 
   return { items, toggleItem, loading }
 }

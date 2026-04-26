@@ -186,6 +186,56 @@ export default function DashboardPage() {
             </div>
           )}
         </section>
+
+        {/* Motivational Gallery */}
+        {!journalLoading && days.some(d => d.screenshot_url_before || d.screenshot_url_after) && (
+          <section className="flex flex-col gap-4 mt-4">
+            <div className="terminal-header">
+              <span className="prefix">&gt;</span>
+              <span>EXECUTION_GALLERY</span>
+              <span className="subtitle">{`// stay focused`}</span>
+            </div>
+            
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-[#333] scrollbar-track-transparent">
+              {days.filter(d => d.screenshot_url_before || d.screenshot_url_after).slice(0, 8).map(day => (
+                <div key={day.date} className="flex gap-4 flex-shrink-0">
+                  {day.screenshot_url_before && (
+                    <div className="flex flex-col gap-2 w-64">
+                      <div className="relative aspect-video rounded-sm border border-[#333] overflow-hidden group">
+                        <img 
+                          src={day.screenshot_url_before} 
+                          alt={`Before ${day.date}`} 
+                          className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                        <div className="absolute bottom-2 left-2 flex flex-col">
+                          <span className="text-[9px] text-[#00ff88] font-bold uppercase tracking-wider">Before Trade</span>
+                          <span className="text-[10px] text-white/70">{day.date}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {day.screenshot_url_after && (
+                    <div className="flex flex-col gap-2 w-64">
+                      <div className="relative aspect-video rounded-sm border border-[#333] overflow-hidden group">
+                        <img 
+                          src={day.screenshot_url_after} 
+                          alt={`After ${day.date}`} 
+                          className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                        <div className="absolute bottom-2 left-2 flex flex-col">
+                          <span className="text-[9px] text-[#00d4ff] font-bold uppercase tracking-wider">After Trade</span>
+                          <span className="text-[10px] text-white/70">{day.date}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
     </>
   )
