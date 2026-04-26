@@ -22,7 +22,7 @@ import {
   SUMMARY_ITEMS,
   getGroupedItems,
 } from '@/lib/checklist-config'
-import { SessionResult, TradePair, Bias, Zone } from '@/types'
+import { SessionResult, TradePair, Bias, Zone, TradeDay, ChecklistSection as SectionType } from '@/types'
 import Navbar from '@/components/Navbar'
 import ChecklistSection from '@/components/ChecklistSection'
 import ChecklistGroup from '@/components/ChecklistGroup'
@@ -56,7 +56,7 @@ export default function SessionPage() {
     updateTradeDay(fields)
   }
 
-  const guardedToggleItem = (key: string, category: string) => {
+  const guardedToggleItem = (key: string, category: SectionType) => {
     if (checkMarketLock()) return
     toggleItem(key, category)
   }
