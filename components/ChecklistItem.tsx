@@ -16,7 +16,6 @@ export default function ChecklistItem({ item, checked, onToggle, disabled }: Che
   const [justToggled, setJustToggled] = useState(false)
 
   const handleToggle = () => {
-    console.log(`Checking item: ${item.key}, disabled: ${disabled}`)
     if (disabled) return
     onToggle()
     if (!checked) {

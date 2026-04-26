@@ -14,7 +14,8 @@ import {
   SUMMARY_ITEMS,
   getGroupedItems,
 } from '@/lib/checklist-config'
-import { formatDate, getResultColor, formatPips } from '@/lib/utils'
+import { formatDate, getResultColor, formatPips, formatTime, getKolkataTime } from '@/lib/utils'
+import { LONDON_WINDOW, NY_WINDOW } from '@/lib/session-timing'
 import { ChecklistItemConfig } from '@/types'
 import Navbar from '@/components/Navbar'
 import { Pencil, ArrowLeft } from 'lucide-react'
@@ -144,6 +145,7 @@ export default function JournalDayPage() {
           <div className="terminal-header mb-2">
             <span className="prefix">&gt;</span>
             <span>LONDON_SESSION</span>
+            <span className="subtitle">{`// ${formatTime(LONDON_WINDOW.startHour, LONDON_WINDOW.startMinute)} – ${formatTime(LONDON_WINDOW.endHour, LONDON_WINDOW.endMinute)} London (${getKolkataTime(LONDON_WINDOW.startHour, LONDON_WINDOW.startMinute)} – ${getKolkataTime(LONDON_WINDOW.endHour, LONDON_WINDOW.endMinute)} Kolkata)`}</span>
           </div>
           <div className="flex flex-wrap gap-6 mb-3">
             <div className="flex flex-col gap-1">
@@ -178,6 +180,7 @@ export default function JournalDayPage() {
           <div className="terminal-header mb-2">
             <span className="prefix">&gt;</span>
             <span>NY_SESSION</span>
+            <span className="subtitle">{`// ${formatTime(NY_WINDOW.startHour, NY_WINDOW.startMinute)} – ${formatTime(NY_WINDOW.endHour, NY_WINDOW.endMinute)} London (${getKolkataTime(NY_WINDOW.startHour, NY_WINDOW.startMinute)} – ${getKolkataTime(NY_WINDOW.endHour, NY_WINDOW.endMinute)} Kolkata)`}</span>
           </div>
           <div className="flex flex-wrap gap-6 mb-3">
             <div className="flex flex-col gap-1">
