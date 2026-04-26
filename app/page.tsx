@@ -109,7 +109,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-bold text-[#ff4444] uppercase tracking-widest">Market is currently closed</span>
-              <span className="text-[10px] text-[#888] uppercase tracking-wider">Trading sessions are paused until Sunday 22:00 London time.</span>
+              <span className="text-[10px] text-[#888] uppercase tracking-wider">Trading sessions are paused until Sunday 10:00 PM London time.</span>
             </div>
           </div>
         )}

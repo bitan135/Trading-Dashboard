@@ -12,7 +12,7 @@ import {
   LONDON_WINDOW,
   NY_WINDOW,
 } from '@/lib/session-timing'
-import { getTodayDate } from '@/lib/utils'
+import { getTodayDate, formatTime } from '@/lib/utils'
 import {
   PRE_SESSION_ITEMS,
   LONDON_LIQ_ITEMS,
@@ -105,7 +105,7 @@ export default function SessionPage() {
     : !preComplete
       ? 'Complete Pre-Session Analysis first'
       : londonStatus === 'countdown'
-        ? `London session opens at ${LONDON_WINDOW.startHour}:${LONDON_WINDOW.startMinute.toString().padStart(2, '0')} UTC`
+        ? `London session opens at ${formatTime(LONDON_WINDOW.startHour, LONDON_WINDOW.startMinute)} London`
         : undefined
 
   const nyLockReason = !isMarketOpen(now)
@@ -113,7 +113,7 @@ export default function SessionPage() {
     : !londonResolved
       ? 'Resolve London session first'
       : nyStatus === 'countdown'
-        ? `NY session opens at ${NY_WINDOW.startHour}:${NY_WINDOW.startMinute.toString().padStart(2, '0')} UTC`
+        ? `NY session opens at ${formatTime(NY_WINDOW.startHour, NY_WINDOW.startMinute)} London`
         : undefined
 
   return (
@@ -192,10 +192,9 @@ export default function SessionPage() {
           )}
         </ChecklistSection>
 
-        {/* SECTION 2 — LONDON */}
         <ChecklistSection
           title="LONDON_SESSION"
-          subtitle={`${LONDON_WINDOW.startHour}:${LONDON_WINDOW.startMinute.toString().padStart(2, '0')}–${LONDON_WINDOW.endHour}:${LONDON_WINDOW.endMinute.toString().padStart(2, '0')} UTC`}
+          subtitle={`${formatTime(LONDON_WINDOW.startHour, LONDON_WINDOW.startMinute)} – ${formatTime(LONDON_WINDOW.endHour, LONDON_WINDOW.endMinute)} London (${formatTime(LONDON_WINDOW.startHour + 4, LONDON_WINDOW.startMinute + 30)} – ${formatTime(LONDON_WINDOW.endHour + 4, LONDON_WINDOW.endMinute + 30)} Kolkata)`}
           status={
             !preComplete ? 'locked' :
             londonResolved ? 'complete' :
@@ -271,7 +270,7 @@ export default function SessionPage() {
         {/* SECTION 3 — NY */}
         <ChecklistSection
           title="NY_SESSION"
-          subtitle={`${NY_WINDOW.startHour}:${NY_WINDOW.startMinute.toString().padStart(2, '0')}–${NY_WINDOW.endHour}:${NY_WINDOW.endMinute.toString().padStart(2, '0')} UTC`}
+          subtitle={`${formatTime(NY_WINDOW.startHour, NY_WINDOW.startMinute)} – ${formatTime(NY_WINDOW.endHour, NY_WINDOW.endMinute)} London (${formatTime(NY_WINDOW.startHour + 4, NY_WINDOW.startMinute + 30)} – ${formatTime(NY_WINDOW.endHour + 4, NY_WINDOW.endMinute + 30)} Kolkata)`}
           status={
             !nyPrereq ? 'locked' :
             nyResolved ? 'complete' :
@@ -349,7 +348,7 @@ export default function SessionPage() {
           title="DAY_SUMMARY"
           subtitle="Discipline Review"
           status={summaryUnlocked ? 'unlocked' : 'locked'}
-          lockReason={!summaryUnlocked ? 'Complete both sessions or wait until 15:00 UTC' : undefined}
+          lockReason={!summaryUnlocked ? 'Complete both sessions or wait until 3:00 PM London' : undefined}
         >
           <div className="flex flex-col gap-4">
             {Object.entries(summaryGroups).map(([group, groupItems]) => (

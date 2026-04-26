@@ -10,12 +10,13 @@ export function useTradeDay(dateString?: string) {
   const { user } = useAuthContext()
   const date = dateString || getTodayDate()
   const [tradeDay, setTradeDay] = useState<TradeDay | null>(null)
+  const [optimisticTradeDay, setOptimisticTradeDay] = useState<TradeDay | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!user) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (loading) setLoading(false)
+      // Use microtask to avoid synchronous state update in effect
+      Promise.resolve().then(() => setLoading(false))
       return
     }
 
@@ -25,7 +26,6 @@ export function useTradeDay(dateString?: string) {
       const { getDb } = await import('@/lib/firebase')
       const docRef = doc(getDb(), 'users', user.uid, 'trade_days', date)
 
-      // Auto-create today's doc if it doesn't exist
       try {
         await setDoc(docRef, {
           ...DEFAULT_TRADE_DAY,
@@ -40,7 +40,9 @@ export function useTradeDay(dateString?: string) {
 
       unsub = onSnapshot(docRef, (snap) => {
         if (snap.exists()) {
-          setTradeDay({ ...DEFAULT_TRADE_DAY, ...snap.data() } as TradeDay)
+          const data = { ...DEFAULT_TRADE_DAY, ...snap.data() } as TradeDay
+          setTradeDay(data)
+          setOptimisticTradeDay(data)
         }
         setLoading(false)
       }, (error) => {
@@ -52,10 +54,15 @@ export function useTradeDay(dateString?: string) {
     init()
 
     return () => { if (unsub) unsub() }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, date])
 
   const updateTradeDay = useCallback(async (fields: Partial<TradeDay>) => {
     if (!user) return
+    
+    // Optimistic Update
+    setOptimisticTradeDay(prev => prev ? { ...prev, ...fields } : null)
+    
     const { getDb } = await import('@/lib/firebase')
     const docRef = doc(getDb(), 'users', user.uid, 'trade_days', date)
     try {
@@ -65,8 +72,10 @@ export function useTradeDay(dateString?: string) {
       }, { merge: true })
     } catch (error) {
       console.error('Error updating trade day:', error)
+      // Rollback on error - use the last stable state from the parent scope
+      setOptimisticTradeDay(tradeDay)
     }
-  }, [user, date])
+  }, [user, date, tradeDay])
 
-  return { tradeDay, loading, updateTradeDay }
+  return { tradeDay: optimisticTradeDay, loading, updateTradeDay }
 }

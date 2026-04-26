@@ -55,7 +55,7 @@ export default function ChecklistSection({ title, subtitle, status, lockReason, 
       )}
 
       {/* Content */}
-      <div className={cn(isLocked && 'pointer-events-none')}>
+      <div>
         {children}
       </div>
     </motion.section>

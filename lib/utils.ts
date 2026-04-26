@@ -1,3 +1,10 @@
+export function formatTime(hour: number, minute: number): string {
+  const h = hour % 12 || 12
+  const ampm = hour >= 12 ? 'PM' : 'AM'
+  const m = minute.toString().padStart(2, '0')
+  return `${h}:${m} ${ampm}`
+}
+
 export function getTodayDate(): string {
   // Returns 'YYYY-MM-DD' exactly for London time
   return new Intl.DateTimeFormat('en-CA', {
