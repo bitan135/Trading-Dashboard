@@ -8,6 +8,7 @@ import { useChecklistItems } from '@/lib/hooks/useChecklistItems'
 import {
   getSessionStatus,
   isSummaryUnlocked,
+  isMarketOpen,
   LONDON_WINDOW,
   NY_WINDOW,
 } from '@/lib/session-timing'
