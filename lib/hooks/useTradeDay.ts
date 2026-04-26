@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, onSnapshot, setDoc, serverTimestamp, deleteDoc } from 'firebase/firestore'
 import { useAuthContext } from '@/components/AuthProvider'
 import { TradeDay, DEFAULT_TRADE_DAY } from '@/types'
 import { getTodayDate, getWeekNumber } from '@/lib/utils'
@@ -77,5 +77,17 @@ export function useTradeDay(dateString?: string) {
     }
   }, [user, date, tradeDay])
 
-  return { tradeDay: optimisticTradeDay, loading, updateTradeDay }
+  const deleteTradeDay = useCallback(async () => {
+    if (!user) return
+    const { getDb } = await import('@/lib/firebase')
+    const docRef = doc(getDb(), 'users', user.uid, 'trade_days', date)
+    try {
+      await deleteDoc(docRef)
+    } catch (err) {
+      console.error('Error deleting trade day:', err)
+      throw err
+    }
+  }, [user, date])
+
+  return { tradeDay: optimisticTradeDay, loading, updateTradeDay, deleteTradeDay }
 }

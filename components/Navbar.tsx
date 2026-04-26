@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuthContext } from '@/components/AuthProvider'
@@ -14,9 +14,7 @@ import {
   LogOut,
   Menu,
   X,
-  Circle,
 } from 'lucide-react'
-import { isMarketOpen } from '@/lib/session-timing'
 
 const NAV_ITEMS = [
   { href: '/',        label: 'Dashboard', icon: LayoutDashboard },
@@ -30,14 +28,6 @@ export default function Navbar() {
   const pathname = usePathname()
   const { user, signOut } = useAuthContext()
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [marketOpen, setMarketOpen] = useState(true)
-
-  useEffect(() => {
-    const check = () => setMarketOpen(isMarketOpen(new Date()))
-    check()
-    const interval = setInterval(check, 60000)
-    return () => clearInterval(interval)
-  }, [])
 
   if (!user) return null
 
@@ -51,17 +41,6 @@ export default function Navbar() {
               <span className="text-[#00ff88] font-bold text-sm tracking-widest">S.C.A.L.P.</span>
               <span className="text-[#555] text-[10px] tracking-wider hidden sm:inline">JOURNAL</span>
             </Link>
-
-            {/* Market Status Badge */}
-            <div className={cn(
-              "flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-tighter",
-              marketOpen 
-                ? "bg-[#00ff88]/5 border-[#00ff88]/20 text-[#00ff88]" 
-                : "bg-[#ff4444]/5 border-[#ff4444]/20 text-[#ff4444]"
-            )}>
-              <Circle size={6} fill="currentColor" className={marketOpen ? "animate-pulse" : ""} />
-              {marketOpen ? "Market Live" : "Market Closed"}
-            </div>
           </div>
 
           {/* Desktop Nav */}

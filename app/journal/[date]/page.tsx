@@ -18,7 +18,7 @@ import { formatDate, getResultColor, formatPips, formatTime, getKolkataTime } fr
 import { LONDON_WINDOW, NY_WINDOW } from '@/lib/session-timing'
 import { ChecklistItemConfig } from '@/types'
 import Navbar from '@/components/Navbar'
-import { Pencil, ArrowLeft } from 'lucide-react'
+import { Pencil, ArrowLeft, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
 function ReadOnlyChecklist({ items, checkedItems }: { items: ChecklistItemConfig[]; checkedItems: Record<string, boolean> }) {
@@ -51,7 +51,7 @@ export default function JournalDayPage() {
   const router = useRouter()
   const params = useParams()
   const dateString = params.date as string
-  const { tradeDay, loading: dayLoading, updateTradeDay } = useTradeDay(dateString)
+  const { tradeDay, loading: dayLoading, updateTradeDay, deleteTradeDay } = useTradeDay(dateString)
   const { items, loading: checklistLoading } = useChecklistItems(dateString)
   const [editing, setEditing] = useState(false)
 
@@ -99,13 +99,27 @@ export default function JournalDayPage() {
               <span className="subtitle">{`// ${formatDate(dateString)}`}</span>
             </div>
           </div>
-          <button
-            onClick={() => setEditing(!editing)}
-            className={`btn-primary flex items-center gap-2 text-xs ${editing ? 'btn-danger' : ''}`}
-          >
-            <Pencil size={12} />
-            {editing ? 'DONE' : 'EDIT'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={async () => {
+                if (confirm('Are you sure you want to delete this journal entry? This action cannot be undone.')) {
+                  await deleteTradeDay()
+                  router.push('/journal')
+                }
+              }}
+              className="btn-primary border-[#ff4444] text-[#ff4444] hover:bg-[#ff4444]/10 flex items-center gap-2 text-xs"
+            >
+              <Trash2 size={12} />
+              DELETE
+            </button>
+            <button
+              onClick={() => setEditing(!editing)}
+              className={`btn-primary flex items-center gap-2 text-xs ${editing ? 'btn-danger' : ''}`}
+            >
+              <Pencil size={12} />
+              {editing ? 'DONE' : 'EDIT'}
+            </button>
+          </div>
         </div>
 
         {/* Meta Info */}
