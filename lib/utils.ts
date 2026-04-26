@@ -1,8 +1,18 @@
 export function formatTime(hour: number, minute: number): string {
-  const h = hour % 12 || 12
-  const ampm = hour >= 12 ? 'PM' : 'AM'
-  const m = minute.toString().padStart(2, '0')
-  return `${h}:${m} ${ampm}`
+  // Handle minute rollover (e.g. 30 + 30 = 60 becomes 1 hour)
+  let h = hour + Math.floor(minute / 60)
+  const m = minute % 60
+  
+  const ampm = h >= 12 && h < 24 ? 'PM' : 'AM'
+  h = h % 12 || 12
+  
+  const mStr = m.toString().padStart(2, '0')
+  return `${h}:${mStr} ${ampm}`
+}
+
+export function getKolkataTime(londonHour: number, londonMinute: number): string {
+  // Kolkata is UTC+5:30, London is UTC+1 (BST) currently. Offset is +4:30.
+  return formatTime(londonHour + 4, londonMinute + 30)
 }
 
 export function getTodayDate(): string {

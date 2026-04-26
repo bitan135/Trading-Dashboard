@@ -172,18 +172,20 @@ export default function RulesPage() {
         {/* Session Windows */}
         <section className="panel p-6 flex flex-col gap-4">
           <h2 className="text-[#00d4ff] text-sm font-bold tracking-[3px] uppercase border-b border-[rgba(0,212,255,0.2)] pb-3">
-            SESSION WINDOWS (UTC)
+            SESSION WINDOWS (LONDON / KOLKATA)
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-[#0a0a0a] border border-[rgba(0,255,136,0.08)] p-4 rounded-sm">
               <p className="text-[10px] text-[#555] uppercase tracking-widest mb-2">London Session</p>
-              <p className="text-lg text-[#00ff88] font-bold">09:00 — 09:30 UTC</p>
-              <p className="text-[11px] text-[#888] mt-1">30-minute entry window</p>
+              <p className="text-lg text-[#00ff88] font-bold">9:00 AM — 9:30 AM London</p>
+              <p className="text-[11px] text-[#00ff88]/60 font-bold">1:30 PM — 2:00 PM Kolkata</p>
+              <p className="text-[11px] text-[#888] mt-2">30-minute entry window</p>
             </div>
             <div className="bg-[#0a0a0a] border border-[rgba(0,255,136,0.08)] p-4 rounded-sm">
               <p className="text-[10px] text-[#555] uppercase tracking-widest mb-2">New York Session</p>
-              <p className="text-lg text-[#00d4ff] font-bold">14:00 — 14:30 UTC</p>
-              <p className="text-[11px] text-[#888] mt-1">30-minute entry window</p>
+              <p className="text-lg text-[#00d4ff] font-bold">2:00 PM — 2:30 PM London</p>
+              <p className="text-[11px] text-[#00d4ff]/60 font-bold">6:30 PM — 7:00 PM Kolkata</p>
+              <p className="text-[11px] text-[#888] mt-2">30-minute entry window</p>
             </div>
           </div>
         </section>

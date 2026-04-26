@@ -12,7 +12,7 @@ import {
   LONDON_WINDOW,
   NY_WINDOW,
 } from '@/lib/session-timing'
-import { getTodayDate, formatTime } from '@/lib/utils'
+import { getTodayDate, formatTime, getKolkataTime } from '@/lib/utils'
 import {
   PRE_SESSION_ITEMS,
   LONDON_LIQ_ITEMS,
@@ -194,7 +194,7 @@ export default function SessionPage() {
 
         <ChecklistSection
           title="LONDON_SESSION"
-          subtitle={`${formatTime(LONDON_WINDOW.startHour, LONDON_WINDOW.startMinute)} – ${formatTime(LONDON_WINDOW.endHour, LONDON_WINDOW.endMinute)} London (${formatTime(LONDON_WINDOW.startHour + 4, LONDON_WINDOW.startMinute + 30)} – ${formatTime(LONDON_WINDOW.endHour + 4, LONDON_WINDOW.endMinute + 30)} Kolkata)`}
+          subtitle={`${formatTime(LONDON_WINDOW.startHour, LONDON_WINDOW.startMinute)} – ${formatTime(LONDON_WINDOW.endHour, LONDON_WINDOW.endMinute)} London (${getKolkataTime(LONDON_WINDOW.startHour, LONDON_WINDOW.startMinute)} – ${getKolkataTime(LONDON_WINDOW.endHour, LONDON_WINDOW.endMinute)} Kolkata)`}
           status={
             !preComplete ? 'locked' :
             londonResolved ? 'complete' :
@@ -213,7 +213,6 @@ export default function SessionPage() {
                 items={groupItems}
                 checkedItems={items}
                 onToggle={(key) => toggleItem(key, 'london_liq')}
-                disabled={londonStatus === 'locked'}
               />
             ))}
             <ProgressBar
@@ -270,7 +269,7 @@ export default function SessionPage() {
         {/* SECTION 3 — NY */}
         <ChecklistSection
           title="NY_SESSION"
-          subtitle={`${formatTime(NY_WINDOW.startHour, NY_WINDOW.startMinute)} – ${formatTime(NY_WINDOW.endHour, NY_WINDOW.endMinute)} London (${formatTime(NY_WINDOW.startHour + 4, NY_WINDOW.startMinute + 30)} – ${formatTime(NY_WINDOW.endHour + 4, NY_WINDOW.endMinute + 30)} Kolkata)`}
+          subtitle={`${formatTime(NY_WINDOW.startHour, NY_WINDOW.startMinute)} – ${formatTime(NY_WINDOW.endHour, NY_WINDOW.endMinute)} London (${getKolkataTime(NY_WINDOW.startHour, NY_WINDOW.startMinute)} – ${getKolkataTime(NY_WINDOW.endHour, NY_WINDOW.endMinute)} Kolkata)`}
           status={
             !nyPrereq ? 'locked' :
             nyResolved ? 'complete' :
@@ -289,7 +288,6 @@ export default function SessionPage() {
                 items={groupItems}
                 checkedItems={items}
                 onToggle={(key) => toggleItem(key, 'ny_liq')}
-                disabled={nyStatus === 'locked'}
               />
             ))}
             <ProgressBar
