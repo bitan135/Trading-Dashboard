@@ -16,7 +16,7 @@ import {
 } from '@/lib/checklist-config'
 import { formatDate, getResultColor, formatPips, formatTime, getKolkataTime } from '@/lib/utils'
 import { LONDON_WINDOW, NY_WINDOW } from '@/lib/session-timing'
-import { ChecklistItemConfig } from '@/types'
+import { ChecklistItemConfig, TradeDay } from '@/types'
 import Navbar from '@/components/Navbar'
 import { Pencil, ArrowLeft, Trash2 } from 'lucide-react'
 import Link from 'next/link'
@@ -54,10 +54,32 @@ export default function JournalDayPage() {
   const { tradeDay, loading: dayLoading, updateTradeDay, deleteTradeDay } = useTradeDay(dateString)
   const { items, loading: checklistLoading } = useChecklistItems(dateString)
   const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState<Partial<TradeDay>>({})
 
   useEffect(() => {
     if (!authLoading && !user) router.push('/login')
   }, [user, authLoading, router])
+
+  const handleEditToggle = () => {
+    if (editing) {
+      // Save changes
+      if (Object.keys(draft).length > 0) {
+        updateTradeDay(draft)
+        setDraft({})
+      }
+    }
+    setEditing(!editing)
+  }
+
+  const updateDraft = (fields: Partial<TradeDay>) => {
+    setDraft(prev => ({ ...prev, ...fields }))
+  }
+
+  // Helper to get current value (draft or saved)
+  const getValue = <K extends keyof TradeDay>(key: K): TradeDay[K] => {
+    if (draft.hasOwnProperty(key)) return draft[key] as TradeDay[K]
+    return tradeDay?.[key] as TradeDay[K]
+  }
 
   if (authLoading || !user || dayLoading || checklistLoading) {
     return (
@@ -113,7 +135,7 @@ export default function JournalDayPage() {
               DELETE
             </button>
             <button
-              onClick={() => setEditing(!editing)}
+              onClick={handleEditToggle}
               className={`btn-primary flex items-center gap-2 text-xs ${editing ? 'btn-danger' : ''}`}
             >
               <Pencil size={12} />
@@ -123,20 +145,57 @@ export default function JournalDayPage() {
         </div>
 
         {/* Meta Info */}
-        <div className="panel p-5 flex flex-wrap gap-6">
-          <div className="flex flex-col gap-1">
+        <div className="panel p-5 flex flex-wrap gap-6 items-end">
+          <div className="flex flex-col gap-1 min-w-[100px]">
             <span className="text-[10px] text-[#555] uppercase tracking-widest">Pair</span>
-            <span className="text-sm text-[#00d4ff]">{tradeDay.pair ?? '—'}</span>
+            {editing ? (
+              <select
+                value={getValue('pair') ?? ''}
+                onChange={e => updateDraft({ pair: (e.target.value || null) as any })}
+                className="bg-[#141414] border-[#333] text-xs py-1"
+              >
+                <option value="">Select...</option>
+                <option value="GBPUSD">GBPUSD</option>
+                <option value="EURUSD">EURUSD</option>
+                <option value="Both">Both</option>
+              </select>
+            ) : (
+              <span className="text-sm text-[#00d4ff]">{getValue('pair') ?? '—'}</span>
+            )}
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 min-w-[100px]">
             <span className="text-[10px] text-[#555] uppercase tracking-widest">Bias</span>
-            <span className={`text-sm ${tradeDay.bias === 'Bullish' ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>
-              {tradeDay.bias ?? '—'}
-            </span>
+            {editing ? (
+              <select
+                value={getValue('bias') ?? ''}
+                onChange={e => updateDraft({ bias: (e.target.value || null) as any })}
+                className="bg-[#141414] border-[#333] text-xs py-1"
+              >
+                <option value="">Select...</option>
+                <option value="Bullish">Bullish</option>
+                <option value="Bearish">Bearish</option>
+              </select>
+            ) : (
+              <span className={`text-sm ${getValue('bias') === 'Bullish' ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>
+                {getValue('bias') ?? '—'}
+              </span>
+            )}
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 min-w-[100px]">
             <span className="text-[10px] text-[#555] uppercase tracking-widest">Zone</span>
-            <span className="text-sm text-[#ffaa00]">{tradeDay.zone ?? '—'}</span>
+            {editing ? (
+              <select
+                value={getValue('zone') ?? ''}
+                onChange={e => updateDraft({ zone: (e.target.value || null) as any })}
+                className="bg-[#141414] border-[#333] text-xs py-1"
+              >
+                <option value="">Select...</option>
+                <option value="Premium">Premium</option>
+                <option value="Discount">Discount</option>
+              </select>
+            ) : (
+              <span className="text-sm text-[#ffaa00]">{getValue('zone') ?? '—'}</span>
+            )}
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-[10px] text-[#555] uppercase tracking-widest">Week</span>
@@ -161,16 +220,41 @@ export default function JournalDayPage() {
             <span>LONDON_SESSION</span>
             <span className="subtitle">{`// ${formatTime(LONDON_WINDOW.startHour, LONDON_WINDOW.startMinute)} – ${formatTime(LONDON_WINDOW.endHour, LONDON_WINDOW.endMinute)} London (${getKolkataTime(LONDON_WINDOW.startHour, LONDON_WINDOW.startMinute)} – ${getKolkataTime(LONDON_WINDOW.endHour, LONDON_WINDOW.endMinute)} Kolkata)`}</span>
           </div>
-          <div className="flex flex-wrap gap-6 mb-3">
-            <div className="flex flex-col gap-1">
+          <div className="flex flex-wrap gap-6 mb-3 items-end">
+            <div className="flex flex-col gap-1 min-w-[120px]">
               <span className="text-[10px] text-[#555] uppercase tracking-widest">Result</span>
-              <span className={`text-lg font-bold ${getResultColor(tradeDay.london_result)}`}>
-                {tradeDay.london_result ?? '—'}
-              </span>
+              {editing ? (
+                <select
+                  value={getValue('london_result') ?? ''}
+                  onChange={e => updateDraft({ london_result: (e.target.value || null) as any })}
+                  className="bg-[#141414] border-[#333] text-sm py-1"
+                >
+                  <option value="">Select...</option>
+                  <option value="Win">Win</option>
+                  <option value="Loss">Loss</option>
+                  <option value="Breakeven">Breakeven</option>
+                  <option value="No Setup">No Setup</option>
+                  <option value="Skipped">Skipped</option>
+                </select>
+              ) : (
+                <span className={`text-lg font-bold ${getResultColor(getValue('london_result'))}`}>
+                  {getValue('london_result') ?? '—'}
+                </span>
+              )}
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 min-w-[80px]">
               <span className="text-[10px] text-[#555] uppercase tracking-widest">Pips</span>
-              <span className="text-lg font-bold text-[#e0e0e0]">{formatPips(tradeDay.london_pips)}</span>
+              {editing ? (
+                <input
+                  type="number"
+                  step="0.1"
+                  value={getValue('london_pips') ?? ''}
+                  onChange={e => updateDraft({ london_pips: e.target.value ? parseFloat(e.target.value) : null })}
+                  className="bg-[#141414] border-[#333] text-sm py-1 w-20"
+                />
+              ) : (
+                <span className="text-lg font-bold text-[#e0e0e0]">{formatPips(getValue('london_pips'))}</span>
+              )}
             </div>
           </div>
           <ReadOnlyChecklist items={[...LONDON_LIQ_ITEMS, ...LONDON_ENTRY_ITEMS]} checkedItems={items} />
@@ -178,13 +262,12 @@ export default function JournalDayPage() {
             <span className="text-[10px] text-[#555] uppercase tracking-widest">Notes</span>
             {editing ? (
               <textarea
-                value={tradeDay.london_notes}
-                onChange={e => updateTradeDay({ london_notes: e.target.value })}
-                onBlur={() => updateTradeDay({ london_notes: tradeDay.london_notes })}
+                value={getValue('london_notes')}
+                onChange={e => updateDraft({ london_notes: e.target.value })}
                 rows={3}
               />
             ) : (
-              <p className="text-xs text-[#888] whitespace-pre-wrap">{tradeDay.london_notes || 'No notes recorded.'}</p>
+              <p className="text-xs text-[#888] whitespace-pre-wrap">{getValue('london_notes') || 'No notes recorded.'}</p>
             )}
           </div>
         </div>
@@ -196,16 +279,41 @@ export default function JournalDayPage() {
             <span>NY_SESSION</span>
             <span className="subtitle">{`// ${formatTime(NY_WINDOW.startHour, NY_WINDOW.startMinute)} – ${formatTime(NY_WINDOW.endHour, NY_WINDOW.endMinute)} London (${getKolkataTime(NY_WINDOW.startHour, NY_WINDOW.startMinute)} – ${getKolkataTime(NY_WINDOW.endHour, NY_WINDOW.endMinute)} Kolkata)`}</span>
           </div>
-          <div className="flex flex-wrap gap-6 mb-3">
-            <div className="flex flex-col gap-1">
+          <div className="flex flex-wrap gap-6 mb-3 items-end">
+            <div className="flex flex-col gap-1 min-w-[120px]">
               <span className="text-[10px] text-[#555] uppercase tracking-widest">Result</span>
-              <span className={`text-lg font-bold ${getResultColor(tradeDay.ny_result)}`}>
-                {tradeDay.ny_result ?? '—'}
-              </span>
+              {editing ? (
+                <select
+                  value={getValue('ny_result') ?? ''}
+                  onChange={e => updateDraft({ ny_result: (e.target.value || null) as any })}
+                  className="bg-[#141414] border-[#333] text-sm py-1"
+                >
+                  <option value="">Select...</option>
+                  <option value="Win">Win</option>
+                  <option value="Loss">Loss</option>
+                  <option value="Breakeven">Breakeven</option>
+                  <option value="No Setup">No Setup</option>
+                  <option value="Skipped">Skipped</option>
+                </select>
+              ) : (
+                <span className={`text-lg font-bold ${getResultColor(getValue('ny_result'))}`}>
+                  {getValue('ny_result') ?? '—'}
+                </span>
+              )}
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 min-w-[80px]">
               <span className="text-[10px] text-[#555] uppercase tracking-widest">Pips</span>
-              <span className="text-lg font-bold text-[#e0e0e0]">{formatPips(tradeDay.ny_pips)}</span>
+              {editing ? (
+                <input
+                  type="number"
+                  step="0.1"
+                  value={getValue('ny_pips') ?? ''}
+                  onChange={e => updateDraft({ ny_pips: e.target.value ? parseFloat(e.target.value) : null })}
+                  className="bg-[#141414] border-[#333] text-sm py-1 w-20"
+                />
+              ) : (
+                <span className="text-lg font-bold text-[#e0e0e0]">{formatPips(getValue('ny_pips'))}</span>
+              )}
             </div>
           </div>
           <ReadOnlyChecklist items={[...NY_LIQ_ITEMS, ...NY_ENTRY_ITEMS]} checkedItems={items} />
@@ -213,13 +321,12 @@ export default function JournalDayPage() {
             <span className="text-[10px] text-[#555] uppercase tracking-widest">Notes</span>
             {editing ? (
               <textarea
-                value={tradeDay.ny_notes}
-                onChange={e => updateTradeDay({ ny_notes: e.target.value })}
-                onBlur={() => updateTradeDay({ ny_notes: tradeDay.ny_notes })}
+                value={getValue('ny_notes')}
+                onChange={e => updateDraft({ ny_notes: e.target.value })}
                 rows={3}
               />
             ) : (
-              <p className="text-xs text-[#888] whitespace-pre-wrap">{tradeDay.ny_notes || 'No notes recorded.'}</p>
+              <p className="text-xs text-[#888] whitespace-pre-wrap">{getValue('ny_notes') || 'No notes recorded.'}</p>
             )}
           </div>
         </div>
@@ -235,13 +342,12 @@ export default function JournalDayPage() {
             <span className="text-[10px] text-[#555] uppercase tracking-widest">Reflection</span>
             {editing ? (
               <textarea
-                value={tradeDay.day_summary_notes}
-                onChange={e => updateTradeDay({ day_summary_notes: e.target.value })}
-                onBlur={() => updateTradeDay({ day_summary_notes: tradeDay.day_summary_notes })}
+                value={getValue('day_summary_notes')}
+                onChange={e => updateDraft({ day_summary_notes: e.target.value })}
                 rows={4}
               />
             ) : (
-              <p className="text-xs text-[#888] whitespace-pre-wrap">{tradeDay.day_summary_notes || 'No reflection recorded.'}</p>
+              <p className="text-xs text-[#888] whitespace-pre-wrap">{getValue('day_summary_notes') || 'No reflection recorded.'}</p>
             )}
           </div>
 
