@@ -56,7 +56,7 @@ export default function OutcomeForm({
       transition={{ duration: 0.3, delay: 0.1 }}
     >
       <div className="text-[11px] text-[#555] uppercase tracking-widest">
-        <span className="text-[#00ff88] opacity-40">// </span>
+        <span className="text-[#00ff88] opacity-40">{`// `}</span>
         {sessionLabel} OUTCOME
       </div>
 

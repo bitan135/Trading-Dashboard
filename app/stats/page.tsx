@@ -48,7 +48,7 @@ export default function StatsPage() {
         <div className="terminal-header">
           <span className="prefix">&gt;</span>
           <span>PERFORMANCE_STATS</span>
-          <span className="subtitle">// all time</span>
+          <span className="subtitle">{`// all time`}</span>
         </div>
 
         {loading ? (

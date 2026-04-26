@@ -102,13 +102,13 @@ export default function SessionPage() {
   const londonLockReason = !preComplete
     ? 'Complete Pre-Session Analysis first'
     : londonStatus === 'countdown'
-      ? undefined
+      ? `London session opens at ${LONDON_WINDOW.startHour}:${LONDON_WINDOW.startMinute.toString().padStart(2, '0')} UTC`
       : undefined
 
   const nyLockReason = !londonResolved
     ? 'Resolve London session first'
     : nyStatus === 'countdown'
-      ? undefined
+      ? `NY session opens at ${NY_WINDOW.startHour}:${NY_WINDOW.startMinute.toString().padStart(2, '0')} UTC`
       : undefined
 
   return (
@@ -190,7 +190,7 @@ export default function SessionPage() {
         {/* SECTION 2 — LONDON */}
         <ChecklistSection
           title="LONDON_SESSION"
-          subtitle="09:00–09:30 UTC"
+          subtitle={`${LONDON_WINDOW.startHour}:${LONDON_WINDOW.startMinute.toString().padStart(2, '0')}–${LONDON_WINDOW.endHour}:${LONDON_WINDOW.endMinute.toString().padStart(2, '0')} UTC`}
           status={
             !preComplete ? 'locked' :
             londonResolved ? 'complete' :
@@ -266,7 +266,7 @@ export default function SessionPage() {
         {/* SECTION 3 — NY */}
         <ChecklistSection
           title="NY_SESSION"
-          subtitle="14:00–14:30 UTC"
+          subtitle={`${NY_WINDOW.startHour}:${NY_WINDOW.startMinute.toString().padStart(2, '0')}–${NY_WINDOW.endHour}:${NY_WINDOW.endMinute.toString().padStart(2, '0')} UTC`}
           status={
             !nyPrereq ? 'locked' :
             nyResolved ? 'complete' :

@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthContext } from '@/components/AuthProvider'
 import { useJournal } from '@/lib/hooks/useJournal'
-import { useStats, useWeekStats } from '@/lib/hooks/useStats'
+import { useWeekStats } from '@/lib/hooks/useStats'
 import { useTradeDay } from '@/lib/hooks/useTradeDay'
 import { useChecklistItems } from '@/lib/hooks/useChecklistItems'
-import { getActiveSessionLabel } from '@/lib/session-timing'
-import { getTodayDate, getWeekNumber } from '@/lib/utils'
+import { getActiveSessionLabel, isMarketOpen } from '@/lib/session-timing'
+import { getTodayDate, getWeekNumber, cn } from '@/lib/utils'
 import Navbar from '@/components/Navbar'
 import DualClock from '@/components/DualClock'
 import ProgressBar from '@/components/ProgressBar'
@@ -28,6 +28,7 @@ export default function DashboardPage() {
   const { days, loading: journalLoading } = useJournal(60)
   const weekStats = useWeekStats(days, currentWeek)
   const [sessionLabel, setSessionLabel] = useState('')
+  const [marketOpen, setMarketOpen] = useState(true)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -36,7 +37,11 @@ export default function DashboardPage() {
   }, [user, authLoading, router])
 
   useEffect(() => {
-    const update = () => setSessionLabel(getActiveSessionLabel(new Date()))
+    const update = () => {
+      const now = new Date()
+      setSessionLabel(getActiveSessionLabel(now))
+      setMarketOpen(isMarketOpen(now))
+    }
     update()
     const interval = setInterval(update, 1000)
     return () => clearInterval(interval)
@@ -74,6 +79,19 @@ export default function DashboardPage() {
               <span className={`text-xs uppercase tracking-widest ${isLive ? 'text-[#00ff88]' : 'text-[#888]'}`}>
                 {sessionLabel}
               </span>
+              <span className="text-[#333]">|</span>
+              <div className="flex items-center gap-1.5">
+                <span className={cn(
+                  "w-1.5 h-1.5 rounded-full",
+                  marketOpen ? "bg-[#00ff88] shadow-[0_0_8px_rgba(0,255,136,0.4)]" : "bg-[#ff4444]"
+                )} />
+                <span className={cn(
+                  "text-[10px] uppercase tracking-[0.2em] font-bold",
+                  marketOpen ? "text-[#00ff88]" : "text-[#ff4444] opacity-70"
+                )}>
+                  MARKET_{marketOpen ? 'LIVE' : 'CLOSED'}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -88,7 +106,7 @@ export default function DashboardPage() {
           <div className="terminal-header">
             <span className="prefix">&gt;</span>
             <span>TODAY_PROGRESS</span>
-            <span className="subtitle">// {today}</span>
+            <span className="subtitle">{`// ${today}`}</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -146,7 +164,7 @@ export default function DashboardPage() {
           <div className="terminal-header">
             <span className="prefix">&gt;</span>
             <span>RECENT_SESSIONS</span>
-            <span className="subtitle">// last 5 days</span>
+            <span className="subtitle">{`// last 5 days`}</span>
           </div>
 
           {journalLoading ? (

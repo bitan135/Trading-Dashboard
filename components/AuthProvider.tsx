@@ -23,7 +23,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!mounted) setMounted(true)
 
     let unsub: (() => void) | undefined
 
@@ -54,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     init()
 
     return () => { if (unsub) unsub() }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const signIn = useCallback(async () => {

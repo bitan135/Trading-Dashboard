@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react'
+import { Upload, X, Loader2 } from 'lucide-react'
 
 interface ImageUploaderProps {
   label: string

@@ -58,13 +58,6 @@ export function getSessionStatus(
 }
 
 export function getCountdown(window: SessionWindow, now: Date): CountdownTime {
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Europe/London',
-    year: 'numeric', month: 'numeric', day: 'numeric',
-    hour: 'numeric', minute: 'numeric', second: 'numeric',
-    hour12: false
-  })
-  
   // The 'now' value in London string format
   // Instead of complex date math, we'll just use minutes remaining locally to keep it perfectly accurate to DST
   const currentTotalMins = getLondonMinutes(now)
@@ -116,6 +109,26 @@ export function isSummaryUnlocked(now: Date, londonResolved: boolean, nyResolved
 
 export function formatCountdown(cd: CountdownTime): string {
   return `${String(cd.hours).padStart(2, '0')}:${String(cd.minutes).padStart(2, '0')}:${String(cd.seconds).padStart(2, '0')}`
+}
+
+export function isMarketOpen(now: Date): boolean {
+  const formatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    weekday: 'long',
+    hour: '2-digit',
+    hour12: false,
+  })
+  
+  const formatted = formatter.format(now)
+  const day = formatted.split(' ')[0]
+  const hour = parseInt(formatted.split(' ')[1], 10)
+
+  // Forex market: Opens Sunday 22:00 London, Closes Friday 22:00 London
+  if (day === 'Saturday') return false
+  if (day === 'Sunday' && hour < 22) return false
+  if (day === 'Friday' && hour >= 22) return false
+  
+  return true
 }
 
 export function getActiveSessionLabel(now: Date): string {

@@ -14,7 +14,8 @@ export function useTradeDay(dateString?: string) {
 
   useEffect(() => {
     if (!user) {
-      setLoading(false)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (loading) setLoading(false)
       return
     }
 

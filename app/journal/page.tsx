@@ -2,10 +2,9 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { useAuthContext } from '@/components/AuthProvider'
 import { useJournal } from '@/lib/hooks/useJournal'
-import { TradeDay, SessionResult, TradePair } from '@/types'
+import { SessionResult, TradePair } from '@/types'
 import { formatDate, getResultColor, getRowBgClass, formatPips } from '@/lib/utils'
 import Navbar from '@/components/Navbar'
 import { ChevronRight } from 'lucide-react'
@@ -67,7 +66,7 @@ export default function JournalPage() {
         <div className="terminal-header">
           <span className="prefix">&gt;</span>
           <span>TRADE_JOURNAL</span>
-          <span className="subtitle">// {filtered.length} entries</span>
+          <span className="subtitle">{`// ${filtered.length} entries`}</span>
         </div>
 
         {/* Filters */}

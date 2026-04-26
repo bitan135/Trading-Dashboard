@@ -30,7 +30,7 @@ export default function ChecklistSection({ title, subtitle, status, lockReason, 
           <span className="prefix">&gt;</span>
           <span>{title}</span>
           {subtitle && (
-            <span className="subtitle">// {subtitle}</span>
+            <span className="subtitle">{`// ${subtitle}`}</span>
           )}
         </div>
         {isLocked && (

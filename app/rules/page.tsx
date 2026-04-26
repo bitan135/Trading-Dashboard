@@ -31,7 +31,7 @@ export default function RulesPage() {
         <div className="terminal-header">
           <span className="prefix">&gt;</span>
           <span>SCALP_FRAMEWORK</span>
-          <span className="subtitle">// WWA Trading — Waqar Asim</span>
+          <span className="subtitle">{`// WWA Trading — Waqar Asim`}</span>
         </div>
 
         {/* S — SPOT THE IMPULSE */}

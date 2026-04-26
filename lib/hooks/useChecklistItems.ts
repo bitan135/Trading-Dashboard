@@ -13,7 +13,8 @@ export function useChecklistItems(dateString: string) {
 
   useEffect(() => {
     if (!user || !dateString) {
-      setLoading(false)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (loading) setLoading(false)
       return
     }
 

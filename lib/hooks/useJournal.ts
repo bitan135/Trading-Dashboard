@@ -12,7 +12,8 @@ export function useJournal(maxDays: number = 60) {
 
   useEffect(() => {
     if (!user) {
-      setLoading(false)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (loading) setLoading(false)
       return
     }
 

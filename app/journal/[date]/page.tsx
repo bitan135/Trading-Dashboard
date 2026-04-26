@@ -27,7 +27,7 @@ function ReadOnlyChecklist({ items, checkedItems }: { items: ChecklistItemConfig
       {Object.entries(grouped).map(([group, groupItems]) => (
         <div key={group}>
           <div className="text-[10px] text-[#555] uppercase tracking-widest px-3 py-1 mb-1">
-            <span className="text-[#00ff88] opacity-40">// </span>{group}
+            <span className="text-[#00ff88] opacity-40">{`// `}</span>{group}
           </div>
           {groupItems.map(item => (
             <div key={item.key} className="flex items-start gap-3 px-3 py-1">
@@ -95,7 +95,7 @@ export default function JournalDayPage() {
             <div className="terminal-header">
               <span className="prefix">&gt;</span>
               <span>DAY_REVIEW</span>
-              <span className="subtitle">// {formatDate(dateString)}</span>
+              <span className="subtitle">{`// ${formatDate(dateString)}`}</span>
             </div>
           </div>
           <button
@@ -134,7 +134,7 @@ export default function JournalDayPage() {
           <div className="terminal-header mb-2">
             <span className="prefix">&gt;</span>
             <span>PRE_SESSION</span>
-            <span className="subtitle">// {PRE_SESSION_ITEMS.filter(i => items[i.key]).length}/{PRE_SESSION_ITEMS.length}</span>
+            <span className="subtitle">{`// ${PRE_SESSION_ITEMS.filter(i => items[i.key]).length}/${PRE_SESSION_ITEMS.length}`}</span>
           </div>
           <ReadOnlyChecklist items={PRE_SESSION_ITEMS} checkedItems={items} />
         </div>
