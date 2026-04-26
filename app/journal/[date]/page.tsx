@@ -14,14 +14,24 @@ import {
   SUMMARY_ITEMS,
   getGroupedItems,
 } from '@/lib/checklist-config'
-import { formatDate, getResultColor, formatPips, formatTime, getKolkataTime } from '@/lib/utils'
+import { formatDate, getResultColor, formatPips, formatTime, getKolkataTime, cn } from '@/lib/utils'
 import { LONDON_WINDOW, NY_WINDOW } from '@/lib/session-timing'
 import { ChecklistItemConfig, TradeDay } from '@/types'
 import Navbar from '@/components/Navbar'
 import { Pencil, ArrowLeft, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
-function ReadOnlyChecklist({ items, checkedItems }: { items: ChecklistItemConfig[]; checkedItems: Record<string, boolean> }) {
+function JournalChecklist({ 
+  items, 
+  checkedItems, 
+  onToggle, 
+  editable 
+}: { 
+  items: ChecklistItemConfig[]; 
+  checkedItems: Record<string, boolean>;
+  onToggle?: (key: string) => void;
+  editable?: boolean;
+}) {
   const grouped = getGroupedItems(items)
   return (
     <div className="flex flex-col gap-3">
@@ -31,11 +41,24 @@ function ReadOnlyChecklist({ items, checkedItems }: { items: ChecklistItemConfig
             <span className="text-[#00ff88] opacity-40">{`// `}</span>{group}
           </div>
           {groupItems.map(item => (
-            <div key={item.key} className="flex items-start gap-3 px-3 py-1">
-              <span className={`text-sm font-bold ${checkedItems[item.key] ? 'text-[#00ff88]' : 'text-[#555]'}`}>
+            <div 
+              key={item.key} 
+              className={cn(
+                "flex items-start gap-3 px-3 py-1",
+                editable && "cursor-pointer hover:bg-white/5 transition-colors"
+              )}
+              onClick={() => editable && onToggle && onToggle(item.key)}
+            >
+              <span className={cn(
+                "text-sm font-bold",
+                checkedItems[item.key] ? 'text-[#00ff88]' : 'text-[#555]'
+              )}>
                 {checkedItems[item.key] ? '[✓]' : '[ ]'}
               </span>
-              <span className={`text-xs ${checkedItems[item.key] ? 'text-[#00ff88] opacity-80' : 'text-[#888]'}`}>
+              <span className={cn(
+                "text-xs",
+                checkedItems[item.key] ? 'text-[#00ff88] opacity-80' : 'text-[#888]'
+              )}>
                 {item.label}
               </span>
             </div>
@@ -52,7 +75,7 @@ export default function JournalDayPage() {
   const params = useParams()
   const dateString = params.date as string
   const { tradeDay, loading: dayLoading, updateTradeDay, deleteTradeDay } = useTradeDay(dateString)
-  const { items, loading: checklistLoading } = useChecklistItems(dateString)
+  const { items, toggleItem, loading: checklistLoading } = useChecklistItems(dateString)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<Partial<TradeDay>>({})
 
@@ -210,7 +233,12 @@ export default function JournalDayPage() {
             <span>PRE_SESSION</span>
             <span className="subtitle">{`// ${PRE_SESSION_ITEMS.filter(i => items[i.key]).length}/${PRE_SESSION_ITEMS.length}`}</span>
           </div>
-          <ReadOnlyChecklist items={PRE_SESSION_ITEMS} checkedItems={items} />
+          <JournalChecklist 
+            items={PRE_SESSION_ITEMS} 
+            checkedItems={items} 
+            editable={editing}
+            onToggle={(key) => toggleItem(key, 'pre')}
+          />
         </div>
 
         {/* London Session */}
@@ -257,7 +285,12 @@ export default function JournalDayPage() {
               )}
             </div>
           </div>
-          <ReadOnlyChecklist items={[...LONDON_LIQ_ITEMS, ...LONDON_ENTRY_ITEMS]} checkedItems={items} />
+          <JournalChecklist 
+            items={[...LONDON_LIQ_ITEMS, ...LONDON_ENTRY_ITEMS]} 
+            checkedItems={items} 
+            editable={editing}
+            onToggle={(key) => toggleItem(key, key.includes('liq') ? 'london_liq' : 'london_entry')}
+          />
           <div className="flex flex-col gap-2 mt-3">
             <span className="text-[10px] text-[#555] uppercase tracking-widest">Notes</span>
             {editing ? (
@@ -316,7 +349,12 @@ export default function JournalDayPage() {
               )}
             </div>
           </div>
-          <ReadOnlyChecklist items={[...NY_LIQ_ITEMS, ...NY_ENTRY_ITEMS]} checkedItems={items} />
+          <JournalChecklist 
+            items={[...NY_LIQ_ITEMS, ...NY_ENTRY_ITEMS]} 
+            checkedItems={items} 
+            editable={editing}
+            onToggle={(key) => toggleItem(key, key.includes('liq') ? 'ny_liq' : 'ny_entry')}
+          />
           <div className="flex flex-col gap-2 mt-3">
             <span className="text-[10px] text-[#555] uppercase tracking-widest">Notes</span>
             {editing ? (
@@ -337,7 +375,12 @@ export default function JournalDayPage() {
             <span className="prefix">&gt;</span>
             <span>DAY_SUMMARY</span>
           </div>
-          <ReadOnlyChecklist items={SUMMARY_ITEMS} checkedItems={items} />
+          <JournalChecklist 
+            items={SUMMARY_ITEMS} 
+            checkedItems={items} 
+            editable={editing}
+            onToggle={(key) => toggleItem(key, 'summary')}
+          />
           <div className="flex flex-col gap-2 mt-3">
             <span className="text-[10px] text-[#555] uppercase tracking-widest">Reflection</span>
             {editing ? (
