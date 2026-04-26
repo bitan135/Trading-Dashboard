@@ -36,9 +36,10 @@ export default function SessionPage() {
   const { user, loading: authLoading } = useAuthContext()
   const router = useRouter()
   const today = getTodayDate()
-  const { tradeDay, loading: dayLoading, updateTradeDay } = useTradeDay(today)
-  const { items, toggleItem, loading: checklistLoading } = useChecklistItems(today)
+  const { tradeDay, loading: dayLoading, error: dayError, updateTradeDay } = useTradeDay(today)
+  const { items, toggleItem, loading: checklistLoading, error: checklistError } = useChecklistItems(today)
   const [now, setNow] = useState(new Date())
+  const [debugCount, setDebugCount] = useState(0)
 
   useEffect(() => {
     if (!authLoading && !user) router.push('/login')
@@ -120,6 +121,33 @@ export default function SessionPage() {
     <>
       <Navbar />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
+        
+        {/* Error Display */}
+        {(dayError || checklistError) && (
+          <div className="panel p-4 bg-red-900/20 border-red-500/50 flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-red-500 font-bold uppercase tracking-widest text-sm">
+              <AlertTriangle size={18} />
+              DATABASE_CONNECTION_ERROR
+            </div>
+            <p className="text-xs text-red-400/80 font-mono">
+              {dayError || checklistError}
+            </p>
+            <p className="text-[10px] text-red-400/60 uppercase">
+              Please check your internet connection or Firebase permissions.
+            </p>
+          </div>
+        )}
+
+        {/* Debug Button */}
+        <div className="panel p-3 border-dashed border-[#555] flex items-center justify-between">
+          <span className="text-[10px] text-[#555] uppercase tracking-widest">Interface Test Mode</span>
+          <button 
+            onClick={() => setDebugCount(c => c + 1)}
+            className="text-[10px] px-3 py-1 border border-[#555] text-[#888] hover:text-[#00ff88] hover:border-[#00ff88] transition-all"
+          >
+            CLICK_TEST: {debugCount}
+          </button>
+        </div>
 
         {/* SECTION 1 — PRE-SESSION */}
         <ChecklistSection

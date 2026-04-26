@@ -9,6 +9,7 @@ export function useChecklistItems(dateString: string) {
   const { user } = useAuthContext()
   const [items, setItems] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({})
 
   useEffect(() => {
@@ -30,8 +31,9 @@ export function useChecklistItems(dateString: string) {
         })
         setItems(data)
         setLoading(false)
-      }, (error) => {
-        console.error('Checklist snapshot error:', error)
+      }, (err) => {
+        console.error('Checklist snapshot error:', err)
+        setError(err.message)
         setLoading(false)
       })
     }
@@ -77,5 +79,5 @@ export function useChecklistItems(dateString: string) {
     })
   }, [user, dateString])
 
-  return { items, toggleItem, loading }
+  return { items, toggleItem, loading, error }
 }

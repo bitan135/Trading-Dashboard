@@ -12,6 +12,7 @@ export function useTradeDay(dateString?: string) {
   const [tradeDay, setTradeDay] = useState<TradeDay | null>(null)
   const [optimisticTradeDay, setOptimisticTradeDay] = useState<TradeDay | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) {
@@ -45,8 +46,9 @@ export function useTradeDay(dateString?: string) {
           setOptimisticTradeDay(data)
         }
         setLoading(false)
-      }, (error) => {
-        console.error('TradeDay snapshot error:', error)
+      }, (err) => {
+        console.error('TradeDay snapshot error:', err)
+        setError(err.message)
         setLoading(false)
       })
     }
@@ -77,5 +79,5 @@ export function useTradeDay(dateString?: string) {
     }
   }, [user, date, tradeDay])
 
-  return { tradeDay: optimisticTradeDay, loading, updateTradeDay }
+  return { tradeDay: optimisticTradeDay, loading, error, updateTradeDay }
 }
