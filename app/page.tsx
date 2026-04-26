@@ -92,11 +92,6 @@ export default function DashboardPage() {
                   MARKET_{marketOpen ? 'LIVE' : 'CLOSED'}
                 </span>
               </div>
-              <span className="text-[#333]">|</span>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1 h-1 rounded-full bg-[#00ff88]/50" />
-                <span className="text-[9px] text-[#555] uppercase tracking-[0.3em]">SYS_READY_V2.1</span>
-              </div>
             </div>
           </div>
 
@@ -105,6 +100,19 @@ export default function DashboardPage() {
             <ChevronRight size={14} />
           </Link>
         </div>
+
+        {/* Market Closed Banner */}
+        {!marketOpen && (
+          <div className="panel bg-[#ff4444]/05 border-[#ff4444]/20 p-4 flex items-center gap-4 animate-fade-in">
+            <div className="w-10 h-10 rounded-full bg-[#ff4444]/10 flex items-center justify-center flex-shrink-0">
+              <span className="w-2 h-2 rounded-full bg-[#ff4444] animate-pulse" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-[#ff4444] uppercase tracking-widest">Market is currently closed</span>
+              <span className="text-[10px] text-[#888] uppercase tracking-wider">Trading sessions are paused until Sunday 22:00 London time.</span>
+            </div>
+          </div>
+        )}
 
         {/* Today's Progress */}
         <section className="panel p-6 flex flex-col gap-5">

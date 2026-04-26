@@ -119,9 +119,10 @@ export function isMarketOpen(now: Date): boolean {
     hour12: false,
   })
   
-  const formatted = formatter.format(now)
-  const day = formatted.split(' ')[0]
-  const hour = parseInt(formatted.split(' ')[1], 10)
+  const parts = formatter.formatToParts(now)
+  const day = parts.find(p => p.type === 'weekday')?.value
+  const hourPart = parts.find(p => p.type === 'hour')?.value
+  const hour = parseInt(hourPart || '0', 10)
 
   // Forex market: Opens Sunday 22:00 London, Closes Friday 22:00 London
   if (day === 'Saturday') return false
