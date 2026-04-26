@@ -233,7 +233,6 @@ export default function SessionPage() {
                   items={groupItems}
                   checkedItems={items}
                   onToggle={(key) => toggleItem(key, 'london_entry')}
-                  disabled={!ldnLiqComplete}
                 />
               ))}
               <ProgressBar
@@ -308,7 +307,6 @@ export default function SessionPage() {
                   items={groupItems}
                   checkedItems={items}
                   onToggle={(key) => toggleItem(key, 'ny_entry')}
-                  disabled={!nyLiqComplete}
                 />
               ))}
               <ProgressBar
@@ -356,7 +354,6 @@ export default function SessionPage() {
                 items={groupItems}
                 checkedItems={items}
                 onToggle={(key) => toggleItem(key, 'summary')}
-                disabled={!summaryUnlocked}
               />
             ))}
             <ProgressBar current={summaryChecked} total={SUMMARY_ITEMS.length} />

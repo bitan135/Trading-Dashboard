@@ -132,7 +132,6 @@ body::after {
 .locked {
   opacity: 0.4;
   filter: grayscale(1);
-  pointer-events: none;
   position: relative;
 }
 
