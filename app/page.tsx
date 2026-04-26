@@ -92,6 +92,11 @@ export default function DashboardPage() {
                   MARKET_{marketOpen ? 'LIVE' : 'CLOSED'}
                 </span>
               </div>
+              <span className="text-[#333]">|</span>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-[#00ff88]/50" />
+                <span className="text-[9px] text-[#555] uppercase tracking-[0.3em]">SYS_READY_V2.1</span>
+              </div>
             </div>
           </div>
 
