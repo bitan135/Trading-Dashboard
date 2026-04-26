@@ -99,17 +99,21 @@ export default function SessionPage() {
     )
   }
 
-  const londonLockReason = !preComplete
-    ? 'Complete Pre-Session Analysis first'
-    : londonStatus === 'countdown'
-      ? `London session opens at ${LONDON_WINDOW.startHour}:${LONDON_WINDOW.startMinute.toString().padStart(2, '0')} UTC`
-      : undefined
+  const londonLockReason = !isMarketOpen(now)
+    ? 'Market is currently closed'
+    : !preComplete
+      ? 'Complete Pre-Session Analysis first'
+      : londonStatus === 'countdown'
+        ? `London session opens at ${LONDON_WINDOW.startHour}:${LONDON_WINDOW.startMinute.toString().padStart(2, '0')} UTC`
+        : undefined
 
-  const nyLockReason = !londonResolved
-    ? 'Resolve London session first'
-    : nyStatus === 'countdown'
-      ? `NY session opens at ${NY_WINDOW.startHour}:${NY_WINDOW.startMinute.toString().padStart(2, '0')} UTC`
-      : undefined
+  const nyLockReason = !isMarketOpen(now)
+    ? 'Market is currently closed'
+    : !londonResolved
+      ? 'Resolve London session first'
+      : nyStatus === 'countdown'
+        ? `NY session opens at ${NY_WINDOW.startHour}:${NY_WINDOW.startMinute.toString().padStart(2, '0')} UTC`
+        : undefined
 
   return (
     <>

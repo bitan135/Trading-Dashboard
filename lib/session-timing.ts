@@ -47,7 +47,7 @@ export function getSessionStatus(
   now: Date,
   prerequisiteMet: boolean
 ): SessionStatus {
-  if (!prerequisiteMet) return 'locked'
+  if (!prerequisiteMet || !isMarketOpen(now)) return 'locked'
 
   const currentMinutes = getLondonMinutes(now)
   const { start, end } = windowToMinutes(window)
